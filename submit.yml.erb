@@ -1,0 +1,41 @@
+<%
+  # your image location will differ
+  ppn = num_cores.blank? ? 1 : num_cores.to_i
+  walltime = (bc_num_hours.to_i * 60)
+  
+  if slurm_partition.include?("gengpu")
+     node_type = "GPU"
+  else
+     node_type = "CPU"
+  end
+  
+  case node_type
+  when "CPU"
+   slurm_args = ["--nodes", "#{number_of_nodes}", "--ntasks", "#{ppn}", "--time", "#{walltime}", "--partition", "#{slurm_partition}", "--job-name", "#{job_name}", "--account", "#{slurm_account}","--mem" , "#{memory_per_node}G" ]
+  when "GPU"
+   slurm_args = ["--nodes", "#{number_of_nodes}", "--ntasks", "#{ppn}", "--time", "#{walltime}", "--partition", "#{slurm_partition}", "--job-name", "#{job_name}", "--account", "#{slurm_account}","--mem" , "#{memory_per_node}G", "--gres", "#{gres_value}" ]
+  end
+%>
+---
+batch_connect:
+  template: vnc
+  websockify_cmd: '/usr/bin/websockify'
+  script_wrapper: |
+    module purge
+    module load singularity
+    cat << "CTRSCRIPT" > container.sh
+    export PATH="$PATH:/opt/TurboVNC/bin"
+    %s
+    CTRSCRIPT
+
+    export SINGULARITY_BINDPATH="/software,/projects,/kellogg/"
+    singularity exec /projects/a9009/sbc538/Projects/OpenOnDemand/abaqus/abaqus-ood.sif /bin/bash container.sh
+
+  header: | 
+    #!/bin/bash
+        . ~/.bashrc
+script:
+  native:
+  <%- slurm_args.each do |arg| %>
+    - "<%= arg %>"
+  <%- end %>

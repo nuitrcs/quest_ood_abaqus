@@ -1,0 +1,8 @@
+---
+name: Abaqus
+icon: fa://abaqus
+category: Interactive Apps
+subcategory: Apps
+role: batch_connect
+description: |
+  This app will launch an abaqus

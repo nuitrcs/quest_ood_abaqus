@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+# Clean the environment
+module purge
+
+# Set working directory to home directory
+cd "${HOME}"
+
+# Create Fluxbox root or it will override the below init file
+(
+  umask 077
+  mkdir -p "${HOME}/.fluxbox"
+)
+
+
+xrandr -s <%= context.vnc_resolution %>
+
+# Start the Fluxbox window manager (it likes to crash on occassion, make it
+# persistent)
+(
+until fluxbox -display "${DISPLAY}.0" -rc "<%= session.staged_root.join("fluxbox.rc") %>"; do
+    echo "Fluxbox crashed with exit code $?. Respawning..." >&2
+    sleep 1
+  done
+) &
+
+#
+# Start Abaqus
+#
+
+# Load the required environment
+module load <%= context.version %>
+
+# Output debug information
+module list
+
+# Launch Abaqus
+set -x
+abaqus cae -mesa \
+  |& tee "<%= session.staged_root.join("abaqus.log") %>"
+ABAQUS_EXIT_CODE=${PIPESTATUS[0]}
+{ set +x; } 2>/dev/null
+
+if [[ ${ABAQUS_EXIT_CODE} -ne 0 ]]; then
+cat | xmessage -file - -center <<- EOL
+ABAQUS/CAE died with the following output:
+
+$(cat "<%= session.staged_root.join("abaqus.log") %>")
+EOL
+fi

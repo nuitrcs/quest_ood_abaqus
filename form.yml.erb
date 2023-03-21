@@ -1,0 +1,135 @@
+# Batch Connect app configuration file
+#
+# @note Used to define the submitted cluster, title, description, and
+<%-
+  cmd = "/usr/bin/sacctmgr show associations user=$USER -P -n format=account,qos"
+  begin
+    output, status = Open3.capture2e(cmd)
+    if status.success?
+      raw_data = output
+    else
+      raise output
+    end
+  rescue => e
+    qos = []
+    qerror = e.message.strip
+  end
+-%>
+
+---
+
+cluster: "quests"
+
+form:
+  - version
+  - vnc_resolution
+  - bc_vnc_resolution
+  - job_name
+  - slurm_partition
+  - gres_value
+  - slurm_account
+  - num_cores
+  - number_of_nodes
+  - memory_per_node
+  - bc_num_hours
+  - bc_email_on_started
+  - raw_data
+  - node_type
+
+attributes:
+  node_type: "CPU"
+
+  version:
+    widget: select
+    label: "Abaqus version"
+    help: "This defines the version of Abaqus you want to load."
+    options:
+      - [ "abaqus2017", "abaqus/2017" ]
+      - [ "abaqus2019", "abaqus/2019" ]
+      - [ "abaqus2020", "abaqus/2020" ]
+      - [ "abaqus2021", "abaqus/2021" ]
+      - [ "abaqus2022", "abaqus/2022" ]
+      - [ "abaqus6d13-1", "abaqus/6.13-1" ]
+
+  vnc_resolution:
+    label: "Resolution"
+    required: true
+    widget: "select"
+    value: "1280x1024"
+    options:
+      - ["2560x1600","2560x1600"]
+      - ["2560x1440","2560x1440"]
+      - ["1920x1200","1920x1200"]
+      - ["1920x1080","1920x1080"] 
+      - ["1600x1200","1600x1200"]
+      - ["1280x1024","1280x1024"]
+      - ["1280x960","1280x960"]  
+      - ["1024x768","1024x768"]
+      - ["800x600","800x600"]
+
+  bc_vnc_resolution:
+    required: true
+    value: "1280x1024"
+
+  job_name:
+    label: "Name of the Job"
+    value: "Abaqus CAE"
+
+  bc_num_hours:
+    label: "Wall Clock Time"
+    help: "The maximum number of hours your Desktop session will run for."
+    value: 1
+
+  slurm_partition: 
+    label: "SLURM Partition"
+    help: "The SLURM partition in which you want to launch this Desktop session. Only savio2_htc is available at this time."
+    widget: select
+
+  slurm_account:
+    label: "SLURM Account/Project Name"
+    help: "The SLURM account (i.e., the value of the -A or --account flag used when submitting a SLURM job)."
+    widget: select
+
+  gres_values:
+    label: "Type of GPU that you would like to request"
+    help: "Options include gpu:a100:1"
+    widget: select
+
+  num_cores:
+    widget: "number_field"
+    label: "Number of cores"
+    value: 1
+    help: |
+      Number of cores per node.
+    min: 1
+    max: 48
+    step: 1
+    id: 'num_cores'
+
+  number_of_nodes:
+    widget: "number_field"
+    label: "Number of nodes"
+    value: 1
+    help: |
+      Number of nodes.
+    min: 0
+    max: 4
+    step: 1
+    id: 'number_of_nodes'
+
+  memory_per_node:
+    widget: "number_field"
+    label: "Amount of memory in GB"
+    value: 5
+    help: |
+      Amount of memory in GB.
+    min: 0
+    max: 250
+    step: 1
+    id: 'memory_per_node'
+
+  raw_data:
+    label: "Account associations for use by JavaScript"
+    widget: hidden_field
+    value: "<%= raw_data %>"
+    cacheable: false
