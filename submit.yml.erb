@@ -30,7 +30,7 @@ batch_connect:
     export SING_BINDS="$SING_BINDS <%= groups.include?('kellogg') ? "--bind /kellogg/:/kellogg/" : "" %>"
 
     # only bind /scratch/<netid> if individual has a scratch space
-    export SING_BINDS="$SING_BINDS <%= File.exist?("/scratch/#{User.new.name}") ? "--bind /scratch/#{User.new.name}:/scratch/#{User.new.name}" : "" %>"
+    export SING_BINDS="$SING_BINDS <%= File.directory?("/scratch/#{User.new.name}") ? "--bind /scratch/#{User.new.name}:/scratch/#{User.new.name}" : "" %>"
 
     # Only bind projects directories that the user would have access to based on their unix groups
     <%- groups.each do |group| %>
