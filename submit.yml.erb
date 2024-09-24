@@ -17,8 +17,17 @@ batch_connect:
     %s
     CTRSCRIPT
 
+    # What is the OS *of the host*
+    HOST_OS=`uname -r`
     # Where is this container
-    export container_image=/software/openondemand/abaqus/abaqus-ood.sif
+    if [[ $HOST_OS =~ "el8" ]]; then
+        export container_image=/software/rhel8/quest_ondemand/desktops/fluxbox/quest-ood-fluxbox-desktop.sif
+    elif [[ $HOST_OS =~ "el7" ]]; then
+        export container_image=/software/openondemand/abaqus/abaqus-ood.sif
+    else
+        echo "Host OS not recognized, no container found"
+    fi
+
 
     # All our software in /software so have to bind that
     export SING_BINDS="--bind /software:/software --bind /hpc/software:/hpc/software --bind /opt/intel:/opt/intel"
