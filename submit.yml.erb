@@ -17,7 +17,7 @@ batch_connect:
     %s
     CTRSCRIPT
 
-    export container_image=/software/rhel8/quest_ondemand/desktops/fluxbox/quest-ood-fluxbox-desktop.sif
+    export container_image=/software/rhel8/quest_ondemand/desktops/xfce/quest-ood-xfce-desktop.sif
 
     # All our software in /software so have to bind that
     export SING_BINDS="--bind /software:/software --bind /hpc/software:/hpc/software --bind /opt/intel:/opt/intel"
@@ -35,7 +35,7 @@ batch_connect:
 
     # Only bind projects directories that the user would have access to based on their unix groups
     <%- groups.each do |group| %>
-    export SING_BINDS="$SING_BINDS <%= File.directory?("/projects/#{group}") ? "--bind /projects/#{group}:/projects/#{group}" : "" %>"
+    export SING_BINDS="$SING_BINDS <%= File.directory?("/projects/#{group}") ? "--bind /projects/#{group}:/projects/#{group} --bind /gpfs/projects/#{group}:/gpfs/projects/#{group}" : "" %>"
     <%- end %>
 
     # Need to add the --nv flag if we are running on a GPU
